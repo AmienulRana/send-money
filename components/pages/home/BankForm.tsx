@@ -13,8 +13,8 @@ import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import useStepStore from "@/hooks/useStepStore";
 import { useSendMoney } from "@/context/SendMoneyContext";
-import { IFormValuesBank } from "@/interfaces";
 import { useEffect } from "react";
+import { IFormValuesBank } from "@/interfaces";
 
 const schema = yup.object().shape({
   bankName: yup.string().required("Field ini wajib diisi"),
