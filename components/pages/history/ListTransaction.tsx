@@ -1,4 +1,5 @@
 import useTransaction from "@/hooks/useTransaction";
+import { currencyFormatIDR } from "@/utils/helper";
 import { Box, Flex, Text, Title } from "@mantine/core";
 import { IconSwitchHorizontal } from "@tabler/icons-react";
 import styled from "styled-components";
@@ -32,7 +33,7 @@ export default function ListTransaction() {
             <Flex justify={'space-between'} align={'center'}>
                 <Box style={{flex: 1}}>
                     <Text size="xs" c={'gray.6'}>You send</Text>
-                    <Text>Rp{(+transaction?.calculator?.senderAmount).toLocaleString()}</Text>
+                    <Text>Rp{currencyFormatIDR(transaction?.calculator?.senderAmount)}</Text>
                 </Box>
                 <Flex direction={'column'} align={'center'} style={{flex: 1}}>
                     <Text size="xs" c={'gray.6'} mb={2}>to {transaction?.countryName}</Text>
@@ -42,7 +43,7 @@ export default function ListTransaction() {
                 </Flex>
                 <Box ta={'end'} style={{flex: 1}}>
                     <Text size="xs" c={'gray.6'}>Recipent gets</Text>
-                    <Text>{transaction?.calculator?.country} {transaction?.calculator?.receiverAmount}</Text>
+                    <Text>{transaction?.calculator?.country} {Number(transaction?.calculator?.receiverAmount).toFixed(2)}</Text>
                 </Box>
             </Flex>
         </WrapperList>
