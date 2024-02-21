@@ -6,7 +6,7 @@ import { useQuery } from "react-query";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useEffect } from "react";
-import { countryData, fetcher } from "@/utils/helper";
+import { countryData, currencyFormatIDR, fetcher } from "@/utils/helper";
 import { URL_API_CURRENCY, URL_API_EXCHANGE } from "@/contants";
 import { IconBolt, IconBuildingBank, IconWallet } from "@tabler/icons-react";
 import CardOption from "./calculator/CardOption";
@@ -65,36 +65,42 @@ export default function Calculator() {
   }, [formValues]);
 
   useEffect(() => {
-    if (watch("senderAmount") === "") {
+    const senderAmount = watch("senderAmount");
+    if (senderAmount === "") {
       return setValue("receiverAmount", "");
     }
 
     if (watch("country") && converstionRate) {
       const calculateReceiverAmount = () => {
         const receiverAmount =
-          +watch("senderAmount") * +converstionRate[watch("country")];
-        setValue("receiverAmount", String(receiverAmount.toFixed(2)));
+          Number(senderAmount) * Number(converstionRate[watch("country")]);
+          setValue("receiverAmount", String(receiverAmount));
+
       };
-      if (watch("senderAmount")) {
+      if (senderAmount) {
         calculateReceiverAmount();
       }
     }
   }, [watch("senderAmount"), converstionRate, watch("country")]);
 
-  // useEffect(() => {
-  //   if (watch("receiverAmount") === "") {
-  //     return setValue("senderAmount", "");
-  //   }
-  //   const calculateSenderAmount = () => {
-  //     const senderAmount =
-  //       +watch("receiverAmount") / +converstionRate[watch("country")];
-  //     setValue("senderAmount", String(senderAmount));
-  //   };
+  useEffect(() => {
+    const receiverAmount = watch("receiverAmount");
+    if (receiverAmount === "") {
+      return setValue("senderAmount", "");
+    }
+    if (watch("country") && converstionRate) {
+      const calculateSenderAmount = () => {
+        const senderAmount =
+          +watch('receiverAmount') / +converstionRate[watch("country")];
 
-  //   if (watch("receiverAmount")) {
-  //     calculateSenderAmount();
-  //   }
-  // }, [watch("receiverAmount"), watch("country")]);
+            setValue('senderAmount', String(senderAmount));
+      };
+
+      if (receiverAmount) {
+        calculateSenderAmount();
+      }
+    }
+  }, [watch("receiverAmount"), watch("country"), watch("senderAmount")]);
 
   if (isLoadCurrency || isLoadExchange) return;
 
@@ -105,7 +111,7 @@ export default function Calculator() {
     const getTheNameCountry = findContryName?.label?.split("-");
     setFormValues({
       ...formValues,
-      calculator: { ...data },
+      calculator: { ...data, receiveRealNumber: watch('receiveRealNumber') },
       countryName: getTheNameCountry[1],
       totalTransfer: +data?.senderAmount + (data.mode == "instant" ? 5000 : 0),
     });
@@ -212,10 +218,10 @@ export default function Calculator() {
           <InfoBox
             title="Total Transfer"
             value={`Rp
-              ${Number(
+              ${currencyFormatIDR(Number(
                 +watch("senderAmount") +
                   (watch("mode") === "instant" ? 5000 : 0)
-              ).toLocaleString()}`}
+              ))}`}
           />
         </>
       )}
