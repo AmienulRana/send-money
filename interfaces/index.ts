@@ -48,6 +48,7 @@ export interface IFormValuesCalculator {
   receiverAmount: string;
   paymentMethod: "transfer" | "e-wallet";
   mode: "instant" | "normal";
+  receiveRealNumber?: number;
 }
 
 export interface IDetailItem {
