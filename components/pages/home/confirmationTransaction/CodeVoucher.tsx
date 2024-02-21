@@ -8,7 +8,7 @@ export default function CodeVoucher({ formValues, setFormValues }: SendMoneyCont
   const [codeVoucher, setCodeVoucher] = useState('');
 
   const handleChangeDiscount = (value: string) => {
-
+    setCodeVoucher(value)
     if (value === "LIMARIBU" && formValues?.totalTransfer > (5000 * 2)) {
       return setFormValues({
         ...formValues,
@@ -28,7 +28,7 @@ export default function CodeVoucher({ formValues, setFormValues }: SendMoneyCont
   };
 
   useEffect(() => {
-    setCodeVoucher(formValues?.discount === 5000 ? 'LIMARIBU' : formValues?.discount === 10000 ?  'SEPULUHRIBU' : '')
+    setCodeVoucher(formValues?.discount === 5000 ? 'LIMARIBU' : formValues?.discount === 10000 ?  'SEPULUHRIBU' : codeVoucher)
   }, [formValues])
   return (
     <>
@@ -36,7 +36,7 @@ export default function CodeVoucher({ formValues, setFormValues }: SendMoneyCont
         Kode Voucher
       </Text>
       <Input
-      value={codeVoucher}
+        value={codeVoucher}
         placeholder="Masukkan Kode Voucher"
         onChange={(e) => handleChangeDiscount(e.target.value)}
         rightSectionPointerEvents="all"
