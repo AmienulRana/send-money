@@ -22,3 +22,8 @@ export const countryData = (currency: any) => {
 
   return removeUndefined;
 };
+
+
+export const currencyFormatIDR = (value: number) => {
+  return (value || 0).toLocaleString('id-ID', {minimumFractionDigits: 0}).split(',')?.[0]
+}
