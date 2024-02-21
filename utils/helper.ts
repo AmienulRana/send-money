@@ -24,6 +24,6 @@ export const countryData = (currency: any) => {
 };
 
 
-export const currencyFormatIDR = (value: number) => {
-  return (value || 0).toLocaleString('id-ID', {minimumFractionDigits: 0}).split(',')?.[0]
+export const currencyFormatIDR = (value: number | string) => {
+  return Number(value || 0).toLocaleString('id-ID', {minimumFractionDigits: 0}).split(',')?.[0]
 }

@@ -1,6 +1,7 @@
 import { SendMoneyContextType } from "@/context/SendMoneyContext";
 import DetailItem from "./DetailItem";
 import { WrapperConfirm } from "../ConfirmationTransaction";
+import { currencyFormatIDR } from "@/utils/helper";
 
 export default function SenderDetail({ formValues }: SendMoneyContextType) {
   return (
@@ -8,9 +9,7 @@ export default function SenderDetail({ formValues }: SendMoneyContextType) {
       <DetailItem label="Negara Tujuan" value={formValues?.countryName} />
       <DetailItem
         label="Uang yang dikirim"
-        value={`Rp ${Number(
-          formValues?.calculator?.senderAmount
-        ).toLocaleString()}`}
+        value={`Rp ${currencyFormatIDR(formValues?.calculator?.senderAmount)}`}
       />
       <DetailItem
         label="Uang yang diterima"
