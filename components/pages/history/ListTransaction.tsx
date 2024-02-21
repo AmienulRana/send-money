@@ -32,7 +32,7 @@ export default function ListTransaction() {
             <Flex justify={'space-between'} align={'center'}>
                 <Box style={{flex: 1}}>
                     <Text size="xs" c={'gray.6'}>You send</Text>
-                    <Text>Rp{(+transaction?.calculator?.senderAmount -  +transaction?.discount).toLocaleString()}</Text>
+                    <Text>Rp{(+transaction?.calculator?.senderAmount).toLocaleString()}</Text>
                 </Box>
                 <Flex direction={'column'} align={'center'} style={{flex: 1}}>
                     <Text size="xs" c={'gray.6'} mb={2}>to {transaction?.countryName}</Text>
