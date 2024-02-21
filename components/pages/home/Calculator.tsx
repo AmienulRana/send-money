@@ -5,7 +5,7 @@ import * as yup from "yup";
 import { useQuery } from "react-query";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { countryData, currencyFormatIDR, fetcher } from "@/utils/helper";
 import { URL_API_CURRENCY, URL_API_EXCHANGE } from "@/contants";
 import { IconBolt, IconBuildingBank, IconWallet } from "@tabler/icons-react";
@@ -42,6 +42,8 @@ export default function Calculator() {
   const { formValues, setFormValues } = useSendMoney();
   const { nextStep } = useStepStore();
 
+  const [isNotSupportCountry,setIsNotSupportCountry] = useState(false);
+
   const {
     handleSubmit,
     control,
@@ -65,6 +67,17 @@ export default function Calculator() {
     setValue("senderAmount", formValues?.calculator?.senderAmount);
   }, [formValues]);
 
+
+  useEffect(() => {
+    const country = watch('country') || 'IDR';
+    if(converstionRate && !converstionRate[country]){
+      alert('Negara untuk saat ini tidak support, silahkan pilih negara lain');
+      setIsNotSupportCountry(true);
+    }else{
+      setIsNotSupportCountry(false);
+    }
+  }, [watch('country'), converstionRate])
+
   useEffect(() => {
     const senderAmount = watch("senderAmount");
     if (senderAmount === "") {
@@ -77,7 +90,6 @@ export default function Calculator() {
           Number(senderAmount) * Number(converstionRate[watch("country")]);
           setValue("receiverAmount", String(receiverAmount));
           setError('receiverAmount', {message: ''})
-
       };
       if (senderAmount) {
         calculateReceiverAmount();
@@ -96,7 +108,6 @@ export default function Calculator() {
           +watch('receiverAmount') / +converstionRate[watch("country")];
             setValue('senderAmount', String(senderAmount));
           setError('senderAmount', {message: ''})
-
       };
 
       if (receiverAmount) {
@@ -139,98 +150,103 @@ export default function Calculator() {
           />
         )}
       />
-      <Controller
-        name="senderAmount"
-        control={control}
-        disabled={!watch("country")}
-        defaultValue=""
-        render={({ field }) => (
-          <NumericFormat
-            {...field}
-            customInput={TextInput}
-            error={errors?.senderAmount?.message}
-            label="Jumlah Pengiriman"
-            mt={20}
-            leftSection={<p style={{ fontSize: 12 }}>IDR</p>}
-            allowNegative={false}
-            decimalScale={0}
-          />
-        )}
-      />
-      <Controller
-        name="receiverAmount"
-        control={control}
-        disabled={!watch("country")}
-        render={({ field }) => (
-          <NumericFormat
-            {...field}
-            customInput={TextInput}
-            error={errors?.receiverAmount?.message}
-            label="Jumlah Penerima"
-            mt={20}
-            leftSection={
-              <p style={{ fontSize: 12 }}>{watch("country") || "IDR"}</p>
-            }
-            // thousandSeparator=","
-          />
-        )}
-      />
-
-      {watch("receiverAmount") && watch("senderAmount") && (
+      {!isNotSupportCountry && (
         <>
-          <InfoBox
-            title="Penerima Akan Mendapatkan:"
-            value={`${Number(watch("receiverAmount")).toFixed(2)} ${watch(
-              "country"
-            )}`}
+        
+          <Controller
+            name="senderAmount"
+            control={control}
+            disabled={!watch("country")}
+            defaultValue=""
+            render={({ field }) => (
+              <NumericFormat
+                {...field}
+                customInput={TextInput}
+                error={errors?.senderAmount?.message}
+                label="Jumlah Pengiriman"
+                mt={20}
+                leftSection={<p style={{ fontSize: 12 }}>IDR</p>}
+                allowNegative={false}
+                decimalScale={0}
+              />
+            )}
           />
-          <Box>
-            <Text mb={15}>Pilih Pembayaran:</Text>
-            <CardOption
-              icon={<IconBuildingBank />}
-              title="Transfer"
-              description="Uang dikirim ke rekening bank penerima"
-              onClick={() => setValue("paymentMethod", "transfer")}
-              checked={watch("paymentMethod") === "transfer"}
-            />
-            <CardOption
-              icon={<IconWallet />}
-              title="E-wallet"
-              description="Uang dikirim ke E-wallet penerima"
-              onClick={() => setValue("paymentMethod", "e-wallet")}
-              checked={watch("paymentMethod") === "e-wallet"}
-            />
-          </Box>
-          <Box mt="xl">
-            <Text mb={15}>Pilih Mode:</Text>
-            <CardOption
-              icon={<IconHourglassFilled />}
-              title="Normal"
-              description="Uang dikirim 3 - 4 jam setelah transaksi"
-              onClick={() => setValue("mode", "normal")}
-              checked={watch("mode") === "normal"}
-            />
-            <CardOption
-              icon={<IconBolt />}
-              title="Instant"
-              description="Uang langsung masuk ke penerima"
-              onClick={() => setValue("mode", "instant")}
-              checked={watch("mode") === "instant"}
-            />
-          </Box>
-          <InfoBox
-            title="Total Transfer"
-            value={`Rp${currencyFormatIDR(Number(
-                +watch("senderAmount") +
-                  (watch("mode") === "instant" ? 5000 : 0)
-              ))}`}
+          <Controller
+            name="receiverAmount"
+            control={control}
+            disabled={!watch("country")}
+            render={({ field }) => (
+              <NumericFormat
+                {...field}
+                customInput={TextInput}
+                error={errors?.receiverAmount?.message}
+                label="Jumlah Penerima"
+                mt={20}
+                leftSection={
+                  <p style={{ fontSize: 12 }}>{watch("country") || "IDR"}</p>
+                }
+                // thousandSeparator=","
+              />
+            )}
           />
+          {watch("receiverAmount") && watch("senderAmount") && (
+            <>
+              <InfoBox
+                title="Penerima Akan Mendapatkan:"
+                value={`${Number(watch("receiverAmount"))} ${watch(
+                  "country"
+                )}`}
+              />
+              <Box>
+                <Text mb={15}>Pilih Pembayaran:</Text>
+                <CardOption
+                  icon={<IconBuildingBank />}
+                  title="Transfer"
+                  description="Uang dikirim ke rekening bank penerima"
+                  onClick={() => setValue("paymentMethod", "transfer")}
+                  checked={watch("paymentMethod") === "transfer"}
+                />
+                <CardOption
+                  icon={<IconWallet />}
+                  title="E-wallet"
+                  description="Uang dikirim ke E-wallet penerima"
+                  onClick={() => setValue("paymentMethod", "e-wallet")}
+                  checked={watch("paymentMethod") === "e-wallet"}
+                />
+              </Box>
+              <Box mt="xl">
+                <Text mb={15}>Pilih Mode:</Text>
+                <CardOption
+                  icon={<IconHourglassFilled />}
+                  title="Normal"
+                  description="Uang dikirim 3 - 4 jam setelah transaksi"
+                  onClick={() => setValue("mode", "normal")}
+                  checked={watch("mode") === "normal"}
+                />
+                <CardOption
+                  icon={<IconBolt />}
+                  title="Instant"
+                  description="Uang langsung masuk ke penerima"
+                  onClick={() => setValue("mode", "instant")}
+                  checked={watch("mode") === "instant"}
+                />
+              </Box>
+              <InfoBox
+                title="Total Transfer"
+                value={`Rp${currencyFormatIDR(Number(
+                    +watch("senderAmount") +
+                      (watch("mode") === "instant" ? 5000 : 0)
+                  ))}`}
+              />
+            </>
+          )}
+        <Button fullWidth mt={20} type="submit">
+          Berikutnya
+        </Button>
         </>
       )}
 
-      <Button fullWidth mt={20} type="submit">
-        Berikutnya
-      </Button>
+
     </form>
   );
 }
