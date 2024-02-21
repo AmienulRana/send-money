@@ -15,10 +15,14 @@ import InfoBox from "./calculator/InfoBox";
 import useStepStore from "@/hooks/useStepStore";
 import { IconHourglassFilled } from "@tabler/icons-react";
 import { IFormValuesCalculator } from "@/interfaces";
+import { NumericFormat } from "react-number-format";
 
 const schema = yup.object().shape({
   country: yup.string().required("Pilih negara tujuan"),
-  senderAmount: yup.string().required("Masukkan jumlah pengiriman"),
+  senderAmount: yup
+    .string()
+    .max(20000000, "Jumlah pengiriman tidak boleh melebihi 20 juta")
+    .required("Masukkan jumlah pengiriman"),
   receiverAmount: yup.string().required("Masukkan jumlah penerima"),
   paymentMethod: yup.string().required("Pilih metode pembayaran"),
   mode: yup.string().required("Pilih mode pengiriman"),
@@ -60,48 +64,37 @@ export default function Calculator() {
     setValue("senderAmount", formValues?.calculator?.senderAmount);
   }, [formValues]);
 
-  // useEffect(() => {
-  //   if (watch("senderAmount") && converstionRate) {
-  //     const multiplyMoneyValue = (
-  //       +watch("senderAmount") * converstionRate[watch("country")]
-  //     ).toFixed(2);
-  //     setValue("receiverAmount", multiplyMoneyValue);
-  //   }
-  // }, [watch("senderAmount"), converstionRate, watch("country")]);
-
-  // useEffect(() => {
-  //   if (watch("receiverAmount") && converstionRate && !watch('senderAmount')) {
-  //     const multiplyMoneyValue = (
-  //       +watch("receiverAmount") * converstionRate['IDR']
-  //     ).toFixed(2);
-  //     setValue("senderAmount", multiplyMoneyValue);
-  //   }
-  // }, [watch("receiverAmount"), converstionRate, watch("country")]);
-
   useEffect(() => {
-    const calculateReceiverAmount = () => {
-      const receiverAmount = Math.round(
-        +watch("senderAmount") * +converstionRate[watch("country")]
-      );
-      setValue("receiverAmount", String(receiverAmount));
-    };
-    if (watch("senderAmount")) {
-      calculateReceiverAmount();
+    if (watch("senderAmount") === "") {
+      return setValue("receiverAmount", "");
     }
-  }, [watch("senderAmount")]);
 
-  useEffect(() => {
-    const calculateSenderAmount = () => {
-      const senderAmount = Math.round(
-        +watch("receiverAmount") / +converstionRate[watch("country")]
-      );
-      setValue("senderAmount", String(senderAmount));
-    };
-
-    if (watch("receiverAmount")) {
-      calculateSenderAmount();
+    if (watch("country") && converstionRate) {
+      const calculateReceiverAmount = () => {
+        const receiverAmount =
+          +watch("senderAmount") * +converstionRate[watch("country")];
+        setValue("receiverAmount", String(receiverAmount.toFixed(2)));
+      };
+      if (watch("senderAmount")) {
+        calculateReceiverAmount();
+      }
     }
-  }, [watch("receiverAmount"), watch("country")]);
+  }, [watch("senderAmount"), converstionRate, watch("country")]);
+
+  // useEffect(() => {
+  //   if (watch("receiverAmount") === "") {
+  //     return setValue("senderAmount", "");
+  //   }
+  //   const calculateSenderAmount = () => {
+  //     const senderAmount =
+  //       +watch("receiverAmount") / +converstionRate[watch("country")];
+  //     setValue("senderAmount", String(senderAmount));
+  //   };
+
+  //   if (watch("receiverAmount")) {
+  //     calculateSenderAmount();
+  //   }
+  // }, [watch("receiverAmount"), watch("country")]);
 
   if (isLoadCurrency || isLoadExchange) return;
 
@@ -143,14 +136,15 @@ export default function Calculator() {
         disabled={!watch("country")}
         defaultValue=""
         render={({ field }) => (
-          <TextInput
+          <NumericFormat
             {...field}
-            mt={25}
-            type="number"
-            disabled={!watch("country")}
+            customInput={TextInput}
+            error={errors?.senderAmount?.message}
             label="Jumlah Pengiriman"
+            mt={20}
             leftSection={<p style={{ fontSize: 12 }}>IDR</p>}
-            error={errors.senderAmount?.message}
+            allowNegative={false}
+            decimalScale={0}
           />
         )}
       />
@@ -159,16 +153,16 @@ export default function Calculator() {
         control={control}
         disabled={!watch("country")}
         render={({ field }) => (
-          <TextInput
+          <NumericFormat
             {...field}
-            mt={25}
-            type="number"
-            disabled={!watch("country")}
+            customInput={TextInput}
+            error={errors?.receiverAmount?.message}
             label="Jumlah Penerima"
+            mt={20}
             leftSection={
               <p style={{ fontSize: 12 }}>{watch("country") || "IDR"}</p>
             }
-            error={errors?.receiverAmount?.message}
+            // thousandSeparator=","
           />
         )}
       />
@@ -177,7 +171,9 @@ export default function Calculator() {
         <>
           <InfoBox
             title="Penerima Akan Mendapatkan:"
-            value={`${watch("receiverAmount")} ${watch("country")}`}
+            value={`${Number(watch("receiverAmount")).toFixed(2)} ${watch(
+              "country"
+            )}`}
           />
           <Box>
             <Text mb={15}>Pilih Pembayaran:</Text>
