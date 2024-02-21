@@ -9,7 +9,13 @@ export default function useTransaction(){
 
 
     const getHistory = () => {
-        return JSON.parse(localStorage.getItem('history') || <any>[]) ;
+        const history = localStorage.getItem('history');
+
+        if(history){
+            return JSON.parse(history);
+
+        }
+        return JSON.parse('[]');
     }
 
     const submitTransaction  = () => {
