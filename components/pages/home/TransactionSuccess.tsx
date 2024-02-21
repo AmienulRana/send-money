@@ -34,7 +34,7 @@ export default function TransactionSuccess() {
         <Text mb={5} fw={'bold'}>Beri penilaian yuk!</Text>
         <Text mb={20} c={"gray.6"}>Berapa nilai yang anda berikan untuk aplikasi ini, agar orang lain mau menggunakannya?</Text>
         <Rating value={value} onChange={setValue} size={'xl'} style={{margin: '0 auto'}} />
-        <Button fullWidth mt={20} onClick={handleSendReview} component={Link} href={'/history'}>
+        <Button fullWidth mt={20} onClick={handleSendReview}>
             Kirim
         </Button>
       </Box>
