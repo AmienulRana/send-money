@@ -48,6 +48,7 @@ export default function Calculator() {
     formState: { errors },
     setValue,
     watch,
+    setError
   } = useForm<IFormValuesCalculator>({
     resolver: yupResolver(schema) as any,
     defaultValues: {
@@ -75,6 +76,7 @@ export default function Calculator() {
         const receiverAmount =
           Number(senderAmount) * Number(converstionRate[watch("country")]);
           setValue("receiverAmount", String(receiverAmount));
+          setError('receiverAmount', {message: ''})
 
       };
       if (senderAmount) {
@@ -92,8 +94,9 @@ export default function Calculator() {
       const calculateSenderAmount = () => {
         const senderAmount =
           +watch('receiverAmount') / +converstionRate[watch("country")];
-
             setValue('senderAmount', String(senderAmount));
+          setError('senderAmount', {message: ''})
+
       };
 
       if (receiverAmount) {
@@ -217,8 +220,7 @@ export default function Calculator() {
           </Box>
           <InfoBox
             title="Total Transfer"
-            value={`Rp
-              ${currencyFormatIDR(Number(
+            value={`Rp${currencyFormatIDR(Number(
                 +watch("senderAmount") +
                   (watch("mode") === "instant" ? 5000 : 0)
               ))}`}
